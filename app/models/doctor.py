@@ -8,7 +8,7 @@ class Doctor(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    specializaiton = Column(String, nullable=False)
+    specialization = Column(String, nullable=False)
     phone = Column(String, nullable=False)
     email = Column(String, unique=True)
     experience_years = Column(Integer, nullable=True)

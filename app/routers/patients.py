@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.patient import Patient
 from app.models.user import User
-from app.schemas.patient import PatientCreate, PatientResponse, PatientUpdate
+from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
 from app.auth import decode_access_token
 from fastapi.security import OAuth2PasswordBearer
 import logging
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/auth", tags=["Patients"])
+router = APIRouter(prefix="/patients", tags=["Patients"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -22,14 +22,14 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 @router.post("/", response_model=PatientResponse, status_code=201)
-def create_patient(patient: PatientCreate, db: Session = Depends(get_db), current_user : User = Depends(get_current_user)):
+def create_patient(patient: PatientCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     new_patient = Patient(
-        name = patient.name,
-        age = patient.age,
-        blood_group = patient.blood_group,
-        phone = patient.phone,
-        address = patient.address,
-        owner_id = current_user.id
+        name=patient.name,
+        age=patient.age,
+        blood_group=patient.blood_group,
+        phone=patient.phone,
+        address=patient.address,
+        owner_id=current_user.id
     )
     db.add(new_patient)
     db.commit()
@@ -37,11 +37,11 @@ def create_patient(patient: PatientCreate, db: Session = Depends(get_db), curren
     return new_patient
 
 @router.get("/", response_model=list[PatientResponse])
-def get_patients(db: Session = Depends(get_db), current_user : User = Depends(get_current_user)):
-    return db.query(Patient).filter(Patient.owner_id == current_user.id).first()
+def get_patients(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return db.query(Patient).filter(Patient.owner_id == current_user.id).all()
 
 @router.get("/{patient_id}", response_model=PatientResponse)
-def get_patient(patient_id: int, db: Session = Depends(get_db), current_user : User = Depends(get_current_user)):
+def get_patient(patient_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -67,7 +67,7 @@ def update_patient(patient_id: int, update: PatientUpdate, db: Session = Depends
     return patient
 
 @router.delete("/{patient_id}", status_code=204)
-def delete_patient(patient_id : int, db : Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_patient(patient_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
