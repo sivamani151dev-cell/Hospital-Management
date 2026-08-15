@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.models.user import User
-from app.schemas.user import UserCreate, UserRespond, Token
+from app.schemas.user import UserCreate, UserResponse, Token
 from app.database import get_db
 from app.auth import hash_password, create_access_token, verify_password
 from fastapi.security import OAuth2PasswordBearer
@@ -13,7 +13,7 @@ load_dotenv()
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-@router.post("/register", response_model=UserRespond, status_code=201)
+@router.post("/register", response_model=UserResponse, status_code=201)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     existing_email = db.query(User).filter(User.email == user.email).first()
     if existing_email:
